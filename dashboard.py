@@ -59,10 +59,11 @@ st.markdown("<div class='main-header'>Healthcare Risk Stratification Dashboard</
 @st.cache_data
 def load_data():
     try:
-        df = pd.read_csv("risk.csv", encoding="ISO-8859-1")
+        url = "https://drive.google.com/uc?export=download&id=1yb0PcQtMn-cOGWtrZmabUbRrtjjAGm_S"
+        df = pd.read_csv(url, encoding="ISO-8859-1")
         return df
     except Exception as e:
-        st.error(f"Error loading data: {e}")
+        st.error(f"Error loading data from Google Drive: {e}")
         return pd.DataFrame()
 
 df = load_data()
