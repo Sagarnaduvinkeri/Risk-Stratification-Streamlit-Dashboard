@@ -129,8 +129,8 @@ if not df.empty:
     )
     
     # --- Tabs ---
-    tab1, tab2, tab3, tab4, tab5 = st.tabs([
-        "📊 Overview", "🏥 Clinical Metrics", "💲 Financial Metrics", "🔍 Member Details", "🤖 Chatbot"
+    tab1, tab2, tab3, tab4 = st.tabs([
+        "📊 Overview", "🏥 Clinical Metrics", "💲 Financial Metrics", "🔍 Member Details"
     ])
     # --- Tab 1: Overview ---
     with tab1:
@@ -620,56 +620,3 @@ if not df.empty:
 
 else:
     st.error("No data available. Please check if the CSV file is correctly loaded.")
-
-    # --- Tab 5: Chatbot (Groq-powered) ---
-        # --- Tab 5: Chatbot (Groq-powered) ---
-    with tab5:
-        st.markdown("<div class='sub-header'>Ask the Dashboard (AI Assistant)</div>", unsafe_allow_html=True)
-
-        user_question = st.text_input("Ask a question about the dataset:")
-
-        if user_question:
-            with st.spinner("Thinking..."):
-                try:
-                    # ✅ 1. Limit sample size to avoid payload overflow
-                    sample = filtered_df[['Age', 'Gender', 'CURRENT_RISK_LEVEL', 'Count of Chron Disease', 'PROSP_TOTAL_RISK']].head(10)
-
-                    # ✅ 2. Use to_string() instead of to_markdown() to avoid missing 'tabulate'
-                    context_summary = sample.to_string(index=False)
-
-                    # ✅ 3. Prepare headers
-                    headers = {
-                        "Authorization": f"Bearer {st.secrets['groq_api_key']}",
-                        "Content-Type": "application/json"
-                    }
-
-                    # ✅ 4. Format messages to match Groq's OpenAI-compatible endpoint
-                    messages = [
-                        {
-                            "role": "system",
-                            "content": "You are a helpful healthcare analyst. Use the data below to answer clearly and concisely."
-                        },
-                        {
-                            "role": "user",
-                            "content": f"Here is sample data:\n{context_summary}\n\nNow answer this: {user_question}"
-                        }
-                    ]
-
-                    payload = {
-                        "model": "mixtral-8x7b-32768",
-                        "messages": messages,
-                        "temperature": 0.5
-                    }
-
-                    # ✅ 5. Call Groq API
-                    response = requests.post("https://api.groq.com/openai/v1/chat/completions", headers=headers, json=payload)
-
-                    # ✅ 6. Handle success or error
-                    if response.status_code == 200:
-                        answer = response.json()['choices'][0]['message']['content']
-                        st.success(answer)
-                    else:
-                        st.error(f"Groq API error {response.status_code}: {response.text}")
-
-                except Exception as e:
-                    st.error(f"Chatbot error: {e}")
